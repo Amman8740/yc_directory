@@ -19,11 +19,12 @@ export const experimental_ppr = true;
 
 const page = async ({ params }: { params: Promise<{ id: string }> }) => {
   const id = (await params).id;
-  console.log({ id });
-  const post = await client.fetch(STARTUP_BY_ID_QUERY, { id });
-  const { select: editorsPosts } = await client.fetch(PLAYLIST_BY_SLUG_QUERY, {
-    slug: "editors-pick",
-  });
+  const [post, { select: editorsPosts }] = await Promise.all([
+    client.fetch(STARTUP_BY_ID_QUERY, { id }),
+    client.fetch(PLAYLIST_BY_SLUG_QUERY, {
+      slug: "editors-pick",
+    })
+  ])
   if (!post) return notFound();
   const parsedContent = md.render(post?.pitch || "");
   return (
